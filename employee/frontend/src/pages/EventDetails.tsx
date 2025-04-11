@@ -5,8 +5,7 @@ import axios from 'axios';
 
 function EventDetails() {
   const { id } = useParams();
-  const [report, setReport] = useState('');
-  const [picture, setPicture] = useState('');
+  
   interface Event {
     _id: string;
     eventName: string;
@@ -18,9 +17,16 @@ function EventDetails() {
   }
 
   const [event, setEvent] = useState<Event | null>(null);
+  const [report, setReport] = useState("");
+  const [picture, setPicture] = useState("");
 
-  // Replace with actual logged-in employee and admin IDs
-  const employeeId = '67f98872c782341dec08fd94';
+  // Mock Employee Data (Replace this with actual logic to fetch employee details)
+  const employee = {
+    _id: '67f98872c782341dec08fd94',
+    name: 'John Doe',
+  };
+
+  // Replace with actual admin ID
   const adminId = '67f97a70406569c0972224ac';
 
   const convertToRawGitHubURL = (url: string): string => {
@@ -32,9 +38,7 @@ function EventDetails() {
         const parts = url.replace(githubPrefix, "").split("/");
         if (parts.length >= 5 && parts[2] === "blob") {
           const [username, repo, , branch, ...pathParts] = parts;
-          return `${rawPrefix}${username}/${repo}/${branch}/${pathParts.join(
-            "/"
-          )}`;
+          return `${rawPrefix}${username}/${repo}/${branch}/${pathParts.join("/")}`;
         }
       }
       return url; // Return the original URL if it's not a valid GitHub link
@@ -60,21 +64,41 @@ function EventDetails() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!employee) {
+      alert("Employee is not logged in.");
+      return;
+    }
+
     try {
-      await axios.post(
-        `http://localhost:5000/api/admin/${adminId}/events/${id}/submit/${employeeId}`,
+      const res = await axios.post(
+        `http://localhost:5000/api/events/${adminId}/${id}/submit`,
         {
-          employeeName: 'Samkit Samsukha', // You can replace with logged-in user’s name
+          employeeId: employee._id,
+          employeeName: employee.name,
           report,
-          picture
+          picture,
         }
       );
-      alert('Report submitted successfully!');
-      setReport('');
-      setPicture('');
-    } catch (err) {
-      console.error('Error submitting report:', err);
-      alert('Submission failed.');
+      if (res.status !== 200) {
+        throw new Error("Failed to submit report");
+      }
+      setReport("");
+      setPicture("");
+      setEvent((prevEvent) => {
+              if (!prevEvent) return prevEvent; // Ensure prevEvent is not null
+              return {
+                ...prevEvent,
+                submissions: [
+                  ...(prevEvent.submissions || []),
+                  { employeeId: employee._id, report, picture },
+                ],
+              };
+            });
+      alert("Report submitted successfully!");
+    } catch (error) {
+      console.error("Error submitting report:", error);
+      alert("Submission failed. Try again.");
     }
   };
 
@@ -82,79 +106,78 @@ function EventDetails() {
 
   return (
     <div className="max-w-6xl mx-auto p-6">
-  <div className="bg-white rounded-lg shadow-md overflow-hidden grid grid-cols-1 md:grid-cols-2 gap-8">
-    
-    {/* LEFT COLUMN: Event Details */}
-    <div className="border-1 border-gray-200 bg-teal-50 shadow-md">
-      <img
-        src={convertToRawGitHubURL(event.eventImage)}
-        alt={event.eventName}
-        className="w-full h-64 object-cover"
-      />
-      <div className="p-6">
-        <h1 className="text-3xl font-bold mb-4">{event.eventName}</h1>
-        <p className="text-gray-600 mb-6">{event.eventDescription}</p>
+      <div className="bg-white rounded-lg shadow-md overflow-hidden grid grid-cols-1 md:grid-cols-2 gap-8">
+        
+        {/* LEFT COLUMN: Event Details */}
+        <div className="border-1 border-gray-200 bg-teal-50 shadow-md">
+          <img
+            src={convertToRawGitHubURL(event.eventImage)}
+            alt={event.eventName}
+            className="w-full h-64 object-cover"
+          />
+          <div className="p-6">
+            <h1 className="text-3xl font-bold mb-4">{event.eventName}</h1>
+            <p className="text-gray-600 mb-6">{event.eventDescription}</p>
 
-        <div className="space-y-4 text-gray-500">
-          <div className="flex items-center space-x-2">
-            <Calendar className="h-5 w-5" />
-            <span>{new Date(event.eventDate).toLocaleDateString()}</span>
+            <div className="space-y-4 text-gray-500">
+              <div className="flex items-center space-x-2">
+                <Calendar className="h-5 w-5" />
+                <span>{new Date(event.eventDate).toLocaleDateString()}</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Users className="h-5 w-5" />
+                <span>{event.submissions?.length || 0} submissions</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Trophy className="h-5 w-5 text-yellow-500" />
+                <span>{event.rewardAmount} coins</span>
+              </div>
+            </div>
           </div>
-          <div className="flex items-center space-x-2">
-            <Users className="h-5 w-5" />
-            <span>{event.submissions?.length || 0} submissions</span>
-          </div>
-          <div className="flex items-center space-x-2">
-            <Trophy className="h-5 w-5 text-yellow-500" />
-            <span>{event.rewardAmount} coins</span>
-          </div>
+        </div>
+
+        {/* RIGHT COLUMN: Submission Form */}
+        <div className="p-6 border-gray-200">
+          <h2 className="text-xl font-semibold mb-6">Submit Your Report</h2>
+
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Event Report
+              </label>
+              <textarea
+                value={report}
+                onChange={(e) => setReport(e.target.value)}
+                className="w-full h-80 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                placeholder="Write your report here..."
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Event Picture URL
+              </label>
+              <input
+                type="url"
+                value={picture}
+                onChange={(e) => setPicture(e.target.value)}
+                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                placeholder="Enter picture URL"
+                required
+              />
+            </div>
+
+            <button
+              type="submit"
+              className="w-full bg-teal-600 text-white py-2 px-4 rounded-lg hover:bg-teal-700 transition-colors"
+            >
+              Submit Report
+            </button>
+          </form>
         </div>
       </div>
     </div>
-
-    {/* RIGHT COLUMN: Submission Form */}
-    <div className="p-6 border-gray-200">
-      <h2 className="text-xl font-semibold mb-6">Submit Your Report</h2>
-
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Event Report
-          </label>
-          <textarea
-            value={report}
-            onChange={(e) => setReport(e.target.value)}
-            className="w-full h-80 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
-            placeholder="Write your report here..."
-            required
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Event Picture URL
-          </label>
-          <input
-            type="url"
-            value={picture}
-            onChange={(e) => setPicture(e.target.value)}
-            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
-            placeholder="Enter picture URL"
-            required
-          />
-        </div>
-
-        <button
-          type="submit"
-          className="w-full bg-teal-600 text-white py-2 px-4 rounded-lg hover:bg-teal-700 transition-colors"
-        >
-          Submit Report
-        </button>
-      </form>
-    </div>
-  </div>
-</div>
-
   );
 }
 
