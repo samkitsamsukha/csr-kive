@@ -67,44 +67,7 @@ const adminSchema = new mongoose.Schema({
 	},
 });
 
-const employeeSchema = new mongoose.Schema({
-	name: {
-		type: String,
-		required: true,
-	},
-	email: {
-		type: String,
-		required: true,
-	},
-	company: {
-		type: String,
-		required: true,
-	},
-	coins: {
-		type: Number,
-		required: true,
-	},
-	events: {
-		type: [
-			{
-				eventName: {
-					type: String,
-					required: true,
-				},
-				eventReport: {
-					type: String,
-					required: true,
-				},
-				eventPicture: {
-					type: String,
-					required: true,
-				}
-			},
-		],
-	},
-});
 
-const Employee = mongoose.model("Employee", employeeSchema);
 const Admin = mongoose.model("Admin", adminSchema);
 
-export { Employee, Admin };
+export {Admin};
