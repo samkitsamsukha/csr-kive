@@ -7,7 +7,7 @@ const adminSchema = new mongoose.Schema({
 	mission: String,
 	events: [
 		{
-			eventName: String,
+			
 			eventDate: Date,
 			eventLocation: String,
 			eventDescription: String,
@@ -31,3 +31,4 @@ const adminSchema = new mongoose.Schema({
 
 const Admin = mongoose.model("Admin", adminSchema);
 export { Admin };
+
