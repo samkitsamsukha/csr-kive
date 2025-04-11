@@ -107,59 +107,74 @@ const EventDetails = () => {
       </div>
 
       <div className="bg-white rounded-lg shadow-md p-6">
-        <h2 className="text-xl font-semibold mb-6">Submissions</h2>
-        <div className="space-y-6">
+        <h2 className="text-2xl font-semibold mb-6">Submissions</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {event.submissions?.map((submission) => (
             <div
               key={submission._id}
-              className="border-b last:border-0 pb-6 last:pb-0"
+              className="border rounded-lg shadow-sm hover:shadow-md transition-shadow p-4 bg-gray-50 flex flex-col h-full"
             >
-              <div className="flex justify-between items-start mb-4">
+              <div className="flex items-center mb-4">
+                <img
+                  src={`https://i.pravatar.cc/150?u=${submission._id}`} // Dummy avatar
+                  alt="User Avatar"
+                  className="w-12 h-12 rounded-full mr-4"
+                />
                 <div>
                   <h3 className="text-lg font-medium">{submission.employeeName}</h3>
                   <p className="text-gray-500 text-sm">
-                    Submitted on {submission.submittedAt && !isNaN(new Date(submission.submittedAt).getTime())
+                    Submitted on{' '}
+                    {submission.submittedAt &&
+                    !isNaN(new Date(submission.submittedAt).getTime())
                       ? format(new Date(submission.submittedAt), 'PPP')
                       : 'Date unavailable'}
                   </p>
                 </div>
               </div>
-              <p className="text-gray-600 mb-4">{submission.report}</p>
-              <img
-                src={submission.picture}
-                alt="Submission"
-                className="w-full h-48 object-cover rounded-lg mb-4"
-              />
-              {editingSubmissionId === submission._id ? (
-                <div className="flex items-center space-x-4">
-                  <input
-                    type="number"
-                    value={coinAmount}
-                    onChange={(e) => setCoinAmount(Number(e.target.value))}
-                    className="border rounded px-3 py-1 w-24"
-                    min="0"
-                  />
+              
+              <div className="flex-grow">
+                <p className="text-gray-700 mb-4 text-sm line-clamp-3">
+                  {submission.report}
+                </p>
+                <img
+                  src={submission.picture || 'https://via.placeholder.com/300'} // Dummy photo
+                  alt="Submission"
+                  className="w-full h-48 object-cover rounded-lg mb-4"
+                />
+              </div>
+              
+              <div className="mt-auto pt-2">
+                {editingSubmissionId === submission._id ? (
+                  <div className="flex items-center space-x-4">
+                    <input
+                      type="number"
+                      value={coinAmount}
+                      onChange={(e) => setCoinAmount(Number(e.target.value))}
+                      className="border rounded px-3 py-1 w-24"
+                      min="0"
+                    />
+                    <button
+                      onClick={() => handleAssignCoins(submission._id)}
+                      className="bg-teal-600 text-white px-4 py-1 rounded hover:bg-teal-700"
+                    >
+                      Assign
+                    </button>
+                    <button
+                      onClick={() => setEditingSubmissionId(null)}
+                      className="text-gray-600 hover:text-gray-800"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                ) : (
                   <button
-                    onClick={() => handleAssignCoins(submission._id)}
-                    className="bg-teal-600 text-white px-4 py-1 rounded hover:bg-teal-700"
+                    onClick={() => setEditingSubmissionId(submission._id)}
+                    className="text-teal-600 hover:text-teal-800"
                   >
-                    Assign
+                    Assign Coins
                   </button>
-                  <button
-                    onClick={() => setEditingSubmissionId(null)}
-                    className="text-gray-600 hover:text-gray-800"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              ) : (
-                <button
-                  onClick={() => setEditingSubmissionId(submission._id)}
-                  className="text-teal-600 hover:text-teal-800"
-                >
-                  Assign Coins
-                </button>
-              )}
+                )}
+              </div>
             </div>
           ))}
         </div>
