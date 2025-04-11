@@ -1,31 +1,58 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Calendar, Users, Trophy } from 'lucide-react';
+import axios from 'axios';
 
 function Events() {
   const navigate = useNavigate();
+  interface Event {
+    _id: string;
+    eventName: string;
+    eventDescription: string;
+    eventDate: string;
+    eventImage: string;
+    submissions?: { userId: string; submissionDate: string }[];
+    rewardAmount: number;
+  }
+
+  const [events, setEvents] = useState<Event[]>([]);
   
-  // Mock data - replace with actual data from Supabase
-  const events = [
-    {
-      id: 1,
-      title: "Annual Hackathon",
-      description: "Build innovative solutions in 24 hours",
-      date: "2024-03-15",
-      participants: 50,
-      reward: 100,
-      image: "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
-    },
-    {
-      id: 2,
-      title: "Tech Talk Series",
-      description: "Share your knowledge with colleagues",
-      date: "2024-03-20",
-      participants: 30,
-      reward: 50,
-      image: "https://images.unsplash.com/photo-1475721027785-f74eccf877e2?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
+  const adminId = '67f97a70406569c0972224ac'; // Replace with actual admin ID or fetch from context/session
+
+  const convertToRawGitHubURL = (url: string): string => {
+    try {
+      const githubPrefix = "https://github.com/";
+      const rawPrefix = "https://raw.githubusercontent.com/";
+  
+      if (url.startsWith(githubPrefix)) {
+        const parts = url.replace(githubPrefix, "").split("/");
+        if (parts.length >= 5 && parts[2] === "blob") {
+          const [username, repo, , branch, ...pathParts] = parts;
+          return `${rawPrefix}${username}/${repo}/${branch}/${pathParts.join(
+            "/"
+          )}`;
+        }
+      }
+      return url; // Return the original URL if it's not a valid GitHub link
+    } catch (error) {
+      console.error("Error converting GitHub URL:", error);
+      return url;
     }
-  ];
+  };
+
+
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        const res = await axios.get(`http://localhost:5000/api/admin/${adminId}`);
+        setEvents(res.data.events);
+      } catch (err) {
+        console.error("Failed to fetch events:", err);
+      }
+    };
+
+    fetchEvents();
+  }, [adminId]);
 
   return (
     <div>
@@ -33,30 +60,30 @@ function Events() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {events.map((event) => (
           <div
-            key={event.id}
+            key={event._id}
             className="bg-white rounded-lg shadow-md overflow-hidden cursor-pointer transform transition-transform hover:scale-105"
-            onClick={() => navigate(`/events/${event.id}`)}
+            onClick={() => navigate(`/events/${event._id}`)}
           >
             <img
-              src={event.image}
-              alt={event.title}
+              src={convertToRawGitHubURL(event.eventImage)}
+              alt={event.eventName}
               className="w-full h-48 object-cover"
             />
             <div className="p-4">
-              <h3 className="font-semibold text-lg mb-2">{event.title}</h3>
-              <p className="text-gray-600 text-sm mb-4">{event.description}</p>
+              <h3 className="font-semibold text-lg mb-2">{event.eventName}</h3>
+              <p className="text-gray-600 text-sm mb-4">{event.eventDescription}</p>
               <div className="flex items-center justify-between text-sm text-gray-500">
                 <div className="flex items-center space-x-1">
                   <Calendar className="h-4 w-4" />
-                  <span>{event.date}</span>
+                  <span>{new Date(event.eventDate).toLocaleDateString()}</span>
                 </div>
                 <div className="flex items-center space-x-1">
                   <Users className="h-4 w-4" />
-                  <span>{event.participants}</span>
+                  <span>{event.submissions?.length || 0}</span>
                 </div>
                 <div className="flex items-center space-x-1">
                   <Trophy className="h-4 w-4 text-yellow-500" />
-                  <span>{event.reward} coins</span>
+                  <span>{event.rewardAmount} coins</span>
                 </div>
               </div>
             </div>

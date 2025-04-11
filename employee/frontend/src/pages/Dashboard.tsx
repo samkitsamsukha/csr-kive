@@ -1,21 +1,40 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Medal } from 'lucide-react';
+import axios from 'axios';
+
+interface Employee {
+  name: string;
+  email: string;
+  company: string;
+  coins: number;
+  submissions: {
+    eventName: string;
+    report: string;
+    picture: string;
+  }[];
+}
 
 function Dashboard() {
-  
-  const employee = {
-    name: "John Doe",
-    email: "john.doe@company.com",
-    company: "Tech Corp",
-    coins: 150,
-    events: [
-      {
-        eventName: "Annual Hackathon",
-        eventReport: "Built a new feature...",
-        eventPicture: "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
+  const [employee, setEmployee] = useState<Employee | null>(null);
+
+  useEffect(() => {
+
+
+    const fetchEmployeeData = async () => {
+      try {
+        const response = await axios.get(`http://localhost:5000/api/employee/67f98872c782341dec08fd94`);
+        setEmployee(response.data);
+      } catch (error) {
+        console.error('Error fetching employee data:', error);
       }
-    ]
-  };
+    };
+
+    fetchEmployeeData();
+  }, []);
+
+  if (!employee) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="space-y-6">
@@ -47,13 +66,13 @@ function Dashboard() {
       <div className="bg-white rounded-lg shadow-md p-6">
         <h2 className="text-2xl font-bold mb-4">Submission History</h2>
         <div className="space-y-4">
-          {employee.events.map((event, index) => (
+          {employee.submissions && employee.submissions.map((submission, index) => (
             <div key={index} className="border rounded-lg p-4">
-              <h3 className="font-semibold text-lg">{event.eventName}</h3>
-              <p className="text-gray-600 mt-2">{event.eventReport}</p>
+              <h3 className="font-semibold text-lg">{submission.eventName}</h3>
+              <p className="text-gray-600 mt-2">{submission.report}</p>
               <img
-                src={event.eventPicture}
-                alt={event.eventName}
+                src={submission.picture}
+                alt={submission.eventName}
                 className="mt-4 rounded-lg w-full h-48 object-cover"
               />
             </div>

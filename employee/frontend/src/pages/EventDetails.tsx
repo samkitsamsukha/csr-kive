@@ -1,94 +1,160 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Calendar, Users, Trophy } from 'lucide-react';
+import axios from 'axios';
 
 function EventDetails() {
   const { id } = useParams();
   const [report, setReport] = useState('');
   const [picture, setPicture] = useState('');
+  interface Event {
+    _id: string;
+    eventName: string;
+    eventDescription: string;
+    eventDate: string;
+    eventImage: string;
+    submissions?: { employeeId: string; report: string; picture: string }[];
+    rewardAmount: number;
+  }
 
-  // Mock data - replace with actual data from Supabase
-  const event = {
-    id: 1,
-    title: "Annual Hackathon",
-    description: "Build innovative solutions in 24 hours",
-    date: "2024-03-15",
-    participants: 50,
-    reward: 100,
-    image: "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
+  const [event, setEvent] = useState<Event | null>(null);
+
+  // Replace with actual logged-in employee and admin IDs
+  const employeeId = '67f98872c782341dec08fd94';
+  const adminId = '67f97a70406569c0972224ac';
+
+  const convertToRawGitHubURL = (url: string): string => {
+    try {
+      const githubPrefix = "https://github.com/";
+      const rawPrefix = "https://raw.githubusercontent.com/";
+
+      if (url.startsWith(githubPrefix)) {
+        const parts = url.replace(githubPrefix, "").split("/");
+        if (parts.length >= 5 && parts[2] === "blob") {
+          const [username, repo, , branch, ...pathParts] = parts;
+          return `${rawPrefix}${username}/${repo}/${branch}/${pathParts.join(
+            "/"
+          )}`;
+        }
+      }
+      return url; // Return the original URL if it's not a valid GitHub link
+    } catch (error) {
+      console.error("Error converting GitHub URL:", error);
+      return url;
+    }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    const fetchEvent = async () => {
+      try {
+        const res = await axios.get(`http://localhost:5000/api/admin/${adminId}`);
+        const foundEvent = res.data.events.find((e: Event) => e._id === id);
+        setEvent(foundEvent);
+      } catch (err) {
+        console.error('Error fetching event:', err);
+      }
+    };
+
+    fetchEvent();
+  }, [id, adminId]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle submission to Supabase
-    console.log({ report, picture });
+    try {
+      await axios.post(
+        `http://localhost:5000/api/admin/${adminId}/event/${id}/submit/${employeeId}`,
+        {
+          employeeName: 'Samkit Samsukha', // You can replace with logged-in user’s name
+          report,
+          picture
+        }
+      );
+      alert('Report submitted successfully!');
+      setReport('');
+      setPicture('');
+    } catch (err) {
+      console.error('Error submitting report:', err);
+      alert('Submission failed.');
+    }
   };
+
+  if (!event) return <div className="text-center py-10 text-gray-500">Loading event...</div>;
 
   return (
-    <div className="max-w-4xl mx-auto">
-      <div className="bg-white rounded-lg shadow-md overflow-hidden">
-        <img
-          src={event.image}
-          alt={event.title}
-          className="w-full h-64 object-cover"
-        />
-        <div className="p-6">
-          <h1 className="text-3xl font-bold mb-4">{event.title}</h1>
-          <p className="text-gray-600 mb-6">{event.description}</p>
-          
-          <div className="flex items-center space-x-6 mb-8 text-gray-500">
-            <div className="flex items-center space-x-2">
-              <Calendar className="h-5 w-5" />
-              <span>{event.date}</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Users className="h-5 w-5" />
-              <span>{event.participants} participants</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Trophy className="h-5 w-5 text-yellow-500" />
-              <span>{event.reward} coins</span>
-            </div>
+    <div className="max-w-6xl mx-auto p-6">
+  <div className="bg-white rounded-lg shadow-md overflow-hidden grid grid-cols-1 md:grid-cols-2 gap-8">
+    
+    {/* LEFT COLUMN: Event Details */}
+    <div className="border-1 border-gray-200 bg-teal-50 shadow-md">
+      <img
+        src={convertToRawGitHubURL(event.eventImage)}
+        alt={event.eventName}
+        className="w-full h-64 object-cover"
+      />
+      <div className="p-6">
+        <h1 className="text-3xl font-bold mb-4">{event.eventName}</h1>
+        <p className="text-gray-600 mb-6">{event.eventDescription}</p>
+
+        <div className="space-y-4 text-gray-500">
+          <div className="flex items-center space-x-2">
+            <Calendar className="h-5 w-5" />
+            <span>{new Date(event.eventDate).toLocaleDateString()}</span>
           </div>
-
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Event Report
-              </label>
-              <textarea
-                value={report}
-                onChange={(e) => setReport(e.target.value)}
-                className="w-full h-32 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Write your report here..."
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Event Picture URL
-              </label>
-              <input
-                type="url"
-                value={picture}
-                onChange={(e) => setPicture(e.target.value)}
-                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Enter picture URL"
-                required
-              />
-            </div>
-
-            <button
-              type="submit"
-              className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              Submit Report
-            </button>
-          </form>
+          <div className="flex items-center space-x-2">
+            <Users className="h-5 w-5" />
+            <span>{event.submissions?.length || 0} submissions</span>
+          </div>
+          <div className="flex items-center space-x-2">
+            <Trophy className="h-5 w-5 text-yellow-500" />
+            <span>{event.rewardAmount} coins</span>
+          </div>
         </div>
       </div>
     </div>
+
+    {/* RIGHT COLUMN: Submission Form */}
+    <div className="p-6 border-gray-200">
+      <h2 className="text-xl font-semibold mb-6">Submit Your Report</h2>
+
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Event Report
+          </label>
+          <textarea
+            value={report}
+            onChange={(e) => setReport(e.target.value)}
+            className="w-full h-80 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+            placeholder="Write your report here..."
+            required
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Event Picture URL
+          </label>
+          <input
+            type="url"
+            value={picture}
+            onChange={(e) => setPicture(e.target.value)}
+            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+            placeholder="Enter picture URL"
+            required
+          />
+        </div>
+
+        <button
+          type="submit"
+          className="w-full bg-teal-600 text-white py-2 px-4 rounded-lg hover:bg-teal-700 transition-colors"
+        >
+          Submit Report
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+
   );
 }
 
