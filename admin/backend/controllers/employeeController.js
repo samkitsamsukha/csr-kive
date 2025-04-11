@@ -10,42 +10,78 @@ export const createEmployee = async (req, res) => {
 	}
 };
 
-export const updateCoins = async (req, res) => {
-	const { employeeId } = req.params;
-	const { coins } = req.body;
+// Get all Employees
+export const getAllEmployees = async (req, res) => {
 	try {
-		const emp = await Employee.findByIdAndUpdate(employeeId, { coins }, { new: true });
-		res.status(200).json(emp);
+		const employees = await Employee.find();
+		res.status(200).json(employees);
 	} catch (err) {
 		res.status(500).json({ error: err.message });
 	}
 };
 
-export const submitReport = async (req, res) => {
-	const { adminId, eventId, employeeId } = req.params;
-	const { report, picture } = req.body;
+// (Optional) Get employee by ID
+export const getEmployeeById = async (req, res) => {
+	try {
+		const employee = await Employee.findById(req.params.employeeId);
+		if (!employee) return res.status(404).json({ error: "Employee not found" });
+		res.status(200).json(employee);
+	} catch (err) {
+		res.status(500).json({ error: err.message });
+	}
+};
+
+// 🔁 Update Coins
+export const updateCoins = async (req, res) => {
+	const { employeeId } = req.params;
+	const { coins } = req.body;
 
 	try {
-		// Update in Admin
+		const employee = await Employee.findByIdAndUpdate(
+			employeeId,
+			{ coins },
+			{ new: true }
+		);
+		if (!employee) return res.status(404).json({ error: "Employee not found" });
+		res.status(200).json(employee);
+	} catch (err) {
+		res.status(500).json({ error: err.message });
+	}
+};
+
+// ✅ Submit Report
+export const submitReport = async (req, res) => {
+	const { adminId, eventId, employeeId } = req.params;
+	const { employeeName, report, picture } = req.body;
+
+	try {
+		// 🔁 Update Admin's submissions
 		const admin = await Admin.findById(adminId);
-		const event = admin.event.id(eventId);
+		if (!admin) return res.status(404).json({ error: "Admin not found" });
+
+		const event = admin.events.id(eventId);
+		if (!event) return res.status(404).json({ error: "Event not found" });
+
 		event.submissions.push({
-			employeeName: req.body.employeeName,
+			employeeName,
 			report,
 			picture,
 		});
 		await admin.save();
 
-		// Update in Employee
+		// 🔁 Update Employee’s event list
 		const employee = await Employee.findById(employeeId);
+		if (!employee) return res.status(404).json({ error: "Employee not found" });
+
 		employee.events.push({
 			eventName: event.eventName,
 			eventReport: report,
 			eventPicture: picture,
 		});
+
 		await employee.save();
 
-		res.status(200).json({ message: "Submission added" });
+		res.status(200).json({ message: "Submission added successfully." });
 	} catch (err) {
 		res.status(500).json({ error: err.message });
 	}

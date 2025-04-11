@@ -1,31 +1,71 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Calendar, MapPin, Users, Coins } from 'lucide-react';
+import { Calendar, MapPin, Users } from 'lucide-react';
 import { Event } from '../../types';
 import { format } from 'date-fns';
 
-interface EventDetailsProps {
-  events: Event[];
-}
-
-const EventDetails = ({ events }: EventDetailsProps) => {
+const EventDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const event = events.find(e => e.id === id);
+  const [event, setEvent] = useState<Event | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const [editingSubmissionId, setEditingSubmissionId] = useState<string | null>(null);
   const [coinAmount, setCoinAmount] = useState<number>(0);
 
-  if (!event) {
-    return <div>Event not found</div>;
-  }
+  useEffect(() => {
+    const fetchEvent = async () => {
+      try {
+        const response = await fetch(`http://localhost:5000/api/admin/67f9547d1bf4fcddd0264e70/events/${id}`);
+        if (!response.ok) {
+          throw new Error('Event not found or server error');
+        }
+        const data = await response.json();
+        setEvent(data);
+      } catch (err) {
+        setError((err as Error).message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (id) {
+      fetchEvent();
+    }
+  }, [id]);
 
   const handleAssignCoins = (submissionId: string) => {
-    // In a real app, this would update the submission with new coins
+    // This should be connected to a PATCH request to update submission coins
     console.log('Assigning coins:', { submissionId, coins: coinAmount });
     setEditingSubmissionId(null);
     setCoinAmount(0);
   };
+
+  const convertToRawGitHubURL = (url: string): string => {
+    try {
+      const githubPrefix = "https://github.com/";
+      const rawPrefix = "https://raw.githubusercontent.com/";
+  
+      if (url.startsWith(githubPrefix)) {
+        const parts = url.replace(githubPrefix, "").split("/");
+        if (parts.length >= 5 && parts[2] === "blob") {
+          const [username, repo, , branch, ...pathParts] = parts;
+          return `${rawPrefix}${username}/${repo}/${branch}/${pathParts.join(
+            "/"
+          )}`;
+        }
+      }
+      return url; // Return the original URL if it's not a valid GitHub link
+    } catch (error) {
+      console.error("Error converting GitHub URL:", error);
+      return url;
+    }
+  };
+
+  if (loading) return <div className="p-8">Loading...</div>;
+  if (error) return <div className="p-8 text-red-500">Error: {error}</div>;
+  if (!event) return <div className="p-8">Event not found</div>;
 
   return (
     <div className="p-8">
@@ -38,7 +78,7 @@ const EventDetails = ({ events }: EventDetailsProps) => {
 
       <div className="bg-white rounded-lg shadow-md overflow-hidden mb-8">
         <img
-          src={event.eventImage}
+          src={convertToRawGitHubURL(event.eventImage)}
           alt={event.eventName}
           className="w-full h-64 object-cover"
         />
@@ -47,7 +87,11 @@ const EventDetails = ({ events }: EventDetailsProps) => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
             <div className="flex items-center text-gray-600">
               <Calendar className="w-5 h-5 mr-2" />
-              {format(new Date(event.eventDate), 'PPP')}
+              {event.eventDate && !isNaN(new Date(event.eventDate).getTime()) ? (
+                format(new Date(event.eventDate), 'PPP')
+              ) : (
+                'Invalid Date'
+              )}
             </div>
             <div className="flex items-center text-gray-600">
               <MapPin className="w-5 h-5 mr-2" />
@@ -55,7 +99,7 @@ const EventDetails = ({ events }: EventDetailsProps) => {
             </div>
             <div className="flex items-center text-gray-600">
               <Users className="w-5 h-5 mr-2" />
-              {event.submissions.length} submissions
+              {event.submissions?.length || 0} submissions
             </div>
           </div>
           <p className="text-gray-600">{event.eventDescription}</p>
@@ -65,21 +109,19 @@ const EventDetails = ({ events }: EventDetailsProps) => {
       <div className="bg-white rounded-lg shadow-md p-6">
         <h2 className="text-xl font-semibold mb-6">Submissions</h2>
         <div className="space-y-6">
-          {event.submissions.map((submission) => (
+          {event.submissions?.map((submission) => (
             <div
-              key={submission.id}
+              key={submission._id}
               className="border-b last:border-0 pb-6 last:pb-0"
             >
               <div className="flex justify-between items-start mb-4">
                 <div>
                   <h3 className="text-lg font-medium">{submission.employeeName}</h3>
                   <p className="text-gray-500 text-sm">
-                    Submitted on {format(new Date(submission.submittedAt), 'PPP')}
+                    Submitted on {submission.submittedAt && !isNaN(new Date(submission.submittedAt).getTime())
+                      ? format(new Date(submission.submittedAt), 'PPP')
+                      : 'Date unavailable'}
                   </p>
-                </div>
-                <div className="flex items-center">
-                  <Coins className="w-5 h-5 text-yellow-500 mr-2" />
-                  <span className="font-medium">{submission.coins} coins</span>
                 </div>
               </div>
               <p className="text-gray-600 mb-4">{submission.report}</p>
@@ -88,7 +130,7 @@ const EventDetails = ({ events }: EventDetailsProps) => {
                 alt="Submission"
                 className="w-full h-48 object-cover rounded-lg mb-4"
               />
-              {editingSubmissionId === submission.id ? (
+              {editingSubmissionId === submission._id ? (
                 <div className="flex items-center space-x-4">
                   <input
                     type="number"
@@ -98,7 +140,7 @@ const EventDetails = ({ events }: EventDetailsProps) => {
                     min="0"
                   />
                   <button
-                    onClick={() => handleAssignCoins(submission.id)}
+                    onClick={() => handleAssignCoins(submission._id)}
                     className="bg-teal-600 text-white px-4 py-1 rounded hover:bg-teal-700"
                   >
                     Assign
@@ -112,7 +154,7 @@ const EventDetails = ({ events }: EventDetailsProps) => {
                 </div>
               ) : (
                 <button
-                  onClick={() => setEditingSubmissionId(submission.id)}
+                  onClick={() => setEditingSubmissionId(submission._id)}
                   className="text-teal-600 hover:text-teal-800"
                 >
                   Assign Coins

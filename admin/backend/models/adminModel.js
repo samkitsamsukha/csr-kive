@@ -1,77 +1,33 @@
 import mongoose from "mongoose";
 
 const adminSchema = new mongoose.Schema({
-	orgName: {
-		type: String,
-		required: true,
-	},
-	vision: {
-		type: String,
-		required: true,
-	},
-	logo: {
-		type: String,
-		required: true,
-	},
-	mission: {
-		type: String,
-		required: true,
-	},
-	event: {
-		type: [
-			{
-				eventName: {
-					type: String,
-					required: true,
+	orgName: String,
+	vision: String,
+	logo: String,
+	mission: String,
+	events: [
+		{
+			eventName: String,
+			eventDate: Date,
+			eventLocation: String,
+			eventDescription: String,
+			eventImage: String,
+			rewardAmount: Number,
+			eventSummary: { type: String, default: "" },
+			submissions: [
+				{
+					employeeId: {
+						type: mongoose.Schema.Types.ObjectId,
+						ref: 'Employee'
+					},
+					employeeName: String,
+					report: String,
+					picture: String,
 				},
-				eventDate: {
-					type: Date,
-					required: true,
-				},
-				eventLocation: {
-					type: String,
-					required: true,
-				},
-				eventDescription: {
-					type: String,
-					required: true,
-				},
-				eventImage: {
-					type: String,
-					required: true,
-				},
-				rewardAmount: {
-					type: Number,
-					required: true,
-				},
-                eventSummary:{
-                    type: String,
-                    default: "",
-                },
-				submissions: {
-					type: [
-						{
-							employeeName: {
-								type: String,
-								required: true,
-							},
-							report: {
-								type: String,
-								required: true,
-							},
-							picture: {
-								type: String,
-								required: true,
-							},
-						},
-					],
-				},
-			},
-		],
-	},
+			],
+		},
+	],
 });
 
-
 const Admin = mongoose.model("Admin", adminSchema);
-
-export {Admin};
+export { Admin };

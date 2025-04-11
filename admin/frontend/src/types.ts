@@ -1,15 +1,16 @@
 export interface Submission {
-  id: string;
+  _id: string;
   employeeId: string;
   employeeName: string;
-  report: string;
-  picture: string;
+  eventName: string;
+  eventReport: string;
+  eventPicture: string;
   coins: number;
   submittedAt: Date;
 }
 
 export interface Event {
-  id: string;
+  _id: string;
   eventName: string;
   eventDate: Date;
   eventLocation: string;
@@ -21,13 +22,11 @@ export interface Event {
 }
 
 export interface Employee {
-  id: string;
+  _id: string;
   name: string;
-  department: string;
-  position: string;
-  avatar: string;
-  totalCoins: number;
-  submissions: Submission[];
+  company: string;
+  coins: number;
+  events: Submission[];
 }
 
 export interface Admin {
