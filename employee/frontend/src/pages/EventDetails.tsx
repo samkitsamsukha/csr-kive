@@ -62,7 +62,7 @@ function EventDetails() {
     e.preventDefault();
     try {
       await axios.post(
-        `http://localhost:5000/api/admin/${adminId}/event/${id}/submit/${employeeId}`,
+        `http://localhost:5000/api/admin/${adminId}/events/${id}/submit/${employeeId}`,
         {
           employeeName: 'Samkit Samsukha', // You can replace with logged-in user’s name
           report,

@@ -7,7 +7,7 @@ const adminSchema = new mongoose.Schema({
 	mission: String,
 	events: [
 		{
-			
+			eventName: String,	
 			eventDate: Date,
 			eventLocation: String,
 			eventDescription: String,

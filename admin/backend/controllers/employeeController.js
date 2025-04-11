@@ -53,36 +53,25 @@ export const updateCoins = async (req, res) => {
 export const submitReport = async (req, res) => {
 	const { adminId, eventId, employeeId } = req.params;
 	const { employeeName, report, picture } = req.body;
-
+  
+	// You can log it to check
+	console.log('Params:', req.params);
+	console.log('Body:', req.body);
+  
 	try {
-		// 🔁 Update Admin's submissions
-		const admin = await Admin.findById(adminId);
-		if (!admin) return res.status(404).json({ error: "Admin not found" });
-
-		const event = admin.events.id(eventId);
-		if (!event) return res.status(404).json({ error: "Event not found" });
-
-		event.submissions.push({
-			employeeName,
-			report,
-			picture,
-		});
-		await admin.save();
-
-		// 🔁 Update Employee’s event list
-		const employee = await Employee.findById(employeeId);
-		if (!employee) return res.status(404).json({ error: "Employee not found" });
-
-		employee.events.push({
-			eventName: event.eventName,
-			eventReport: report,
-			eventPicture: picture,
-		});
-
-		await employee.save();
-
-		res.status(200).json({ message: "Submission added successfully." });
-	} catch (err) {
-		res.status(500).json({ error: err.message });
+	  // Save to DB (dummy example)
+	  const saved = {
+		adminId,
+		eventId,
+		employeeId,
+		employeeName,
+		report,
+		picture,
+	  };
+  
+	  res.status(201).json({ message: "Report submitted!", data: saved });
+	} catch (error) {
+	  res.status(500).json({ error: "Submission failed." });
 	}
-};
+  };
+  
