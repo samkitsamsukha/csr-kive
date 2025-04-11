@@ -17,7 +17,7 @@ const EventDetails = () => {
   useEffect(() => {
     const fetchEvent = async () => {
       try {
-        const response = await fetch(`http://localhost:5000/api/admin/67f9547d1bf4fcddd0264e70/events/${id}`);
+        const response = await fetch(`http://localhost:5000/api/admin/67f97a70406569c0972224ac/events/${id}`);
         if (!response.ok) {
           throw new Error('Event not found or server error');
         }

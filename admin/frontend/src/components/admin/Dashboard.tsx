@@ -33,7 +33,7 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchAdmin = async () => {
       try {
-        const res = await axios.get('http://localhost:5000/api/admin/67f9547d1bf4fcddd0264e70'); // adjust URL if needed
+        const res = await axios.get('http://localhost:5000/api/admin/67f97a70406569c0972224ac'); // adjust URL if needed
         setAdminData(res.data);
         console.log('Admin data:', res.data);
       } catch (err) {
