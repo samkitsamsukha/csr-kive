@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Calendar, MapPin, DollarSign, Image, FileText } from 'lucide-react';
+import axios from 'axios';
 
 const CreateEvent = () => {
   const navigate = useNavigate();
@@ -13,11 +14,22 @@ const CreateEvent = () => {
     rewardAmount: '',
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // In a real app, this would send data to the backend
-    console.log('Event created:', formData);
-    navigate('/admin/dashboard');
+  
+    try {
+      const response = await axios.post('http://localhost:5000/api/admin/67f9547d1bf4fcddd0264e70/events', {
+        ...formData,
+        rewardAmount: Number(formData.rewardAmount),
+      });
+      
+  
+      console.log('Event created successfully:', response.data);
+      navigate('/admin/dashboard');
+    } catch (error) {
+      console.error('Error creating event:', error);
+      alert('Failed to create event');
+    }
   };
 
   return (
