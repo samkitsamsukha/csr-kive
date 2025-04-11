@@ -44,6 +44,10 @@ const adminSchema = new mongoose.Schema({
 					type: Number,
 					required: true,
 				},
+                eventSummary:{
+                    type: String,
+                    default: "",
+                },
 				submissions: {
 					type: [
 						{
