@@ -32,6 +32,27 @@ function Dashboard() {
     fetchEmployeeData();
   }, []);
 
+  const convertToRawGitHubURL = (url: string): string => {
+    try {
+      const githubPrefix = "https://github.com/";
+      const rawPrefix = "https://raw.githubusercontent.com/";
+
+      if (url.startsWith(githubPrefix)) {
+        const parts = url.replace(githubPrefix, "").split("/");
+        if (parts.length >= 5 && parts[2] === "blob") {
+          const [username, repo, , branch, ...pathParts] = parts;
+          return `${rawPrefix}${username}/${repo}/${branch}/${pathParts.join(
+            "/"
+          )}`;
+        }
+      }
+      return url; // Return the original URL if it's not a valid GitHub link
+    } catch (error) {
+      console.error("Error converting GitHub URL:", error);
+      return url;
+    }
+  };
+
   if (!employee) {
     return <div>Loading...</div>;
   }
@@ -66,14 +87,21 @@ function Dashboard() {
       <div className="bg-white rounded-lg shadow-md p-6">
         <h2 className="text-2xl font-bold mb-4">Submission History</h2>
         <div className="space-y-4">
-          {employee.submissions && employee.submissions.map((submission, index) => (
-            <div key={index} className="border rounded-lg p-4">
-              <h3 className="font-semibold text-lg">{submission.eventName}</h3>
-              <p className="text-gray-600 mt-2">{submission.report}</p>
+        {employee.events.map((submission) => (
+            <div
+              key={submission._id}
+              className="border-b last:border-0 pb-6 last:pb-0"
+            >
+              <div className="flex justify-between items-start mb-4">
+                <div>
+                  <h3 className='font-semibold text-xl text-teal-900'>{submission.eventName}</h3>
+                  <h3 className="text-lg font-medium">{submission.eventReport}</h3>
+                </div>
+              </div>
               <img
-                src={submission.picture}
-                alt={submission.eventName}
-                className="mt-4 rounded-lg w-full h-48 object-cover"
+                src={convertToRawGitHubURL(submission.eventPicture)}
+                alt="Submission"
+                className="h-64 w-fit object-cover rounded-lg"
               />
             </div>
           ))}
