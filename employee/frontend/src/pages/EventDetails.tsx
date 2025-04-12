@@ -80,7 +80,11 @@ function EventDetails() {
       const res = await axios.post(
         `http://localhost:5000/api/events/${adminId}/${id}/submit`,
         {
+<<<<<<< HEAD
           employeeId: employee._id,
+=======
+          employeeId: "67f98872c782341dec08fd94",
+>>>>>>> eef8e9a3806093abf58448e332c6c688869cfba5
           employeeName: "Samkit Samsukha",
           report,
           picture
