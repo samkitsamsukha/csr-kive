@@ -118,13 +118,13 @@ const EventDetails = () => {
                 
                 <div>
                   <h3 className="text-lg font-medium">{submission.employeeName}</h3>
-                  <p className="text-gray-500 text-sm">
+                  {/* <p className="text-gray-500 text-sm">
                     Submitted on{' '}
                     {submission.submittedAt &&
                     !isNaN(new Date(submission.submittedAt).getTime())
                       ? format(new Date(submission.submittedAt), 'PPP')
                       : 'Date unavailable'}
-                  </p>
+                  </p> */}
                 </div>
               </div>
               

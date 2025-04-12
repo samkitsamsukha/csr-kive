@@ -1,6 +1,6 @@
 import React from 'react';
 import { Outlet, NavLink } from 'react-router-dom';
-import { LayoutDashboard, Users, Trophy, FileText } from 'lucide-react';
+import { LayoutDashboard, Users, Trophy, FileText, Building2 } from 'lucide-react';
 import clsx from 'clsx';
 
 const AdminLayout = () => {
@@ -8,7 +8,8 @@ const AdminLayout = () => {
     { icon: LayoutDashboard, label: 'Dashboard', to: '/' },
     { icon: Users, label: 'Employees', to: '/employees' },
     { icon: Trophy, label: 'Leaderboard', to: '/leaderboard' },
-    { icon: FileText, label: 'View Audits', to: '/audits' }
+    { icon: FileText, label: 'View Audits', to: '/audits' },
+    { icon: Building2, label: 'NGO Connect', to: '/ngoconnect' }
   ];
 
   return (
@@ -35,6 +36,13 @@ const AdminLayout = () => {
             </NavLink>
           ))}
         </nav>
+        <div className='fixed bottom-0 p-6 flex flex-col items-center gap-2 justify-center'>
+          <div className='w-[50px] h-[50px] flex justify-center items-center text-white rounded-full bg-black font-semibold'>VAS</div>
+          <div className='text-teal-900 font-semibold text-lg'>VAS Consultancy Services</div>
+          <div>www.vas.com</div>
+          <div>+91 9239 089 089</div>
+          <div>Bengaluru, Karnataka</div>
+        </div>
       </aside>
 
       {/* Main content */}

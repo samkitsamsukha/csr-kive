@@ -7,7 +7,8 @@ import EventDetails from './components/admin/EventDetails';
 import EmployeeDetails from './components/admin/EmployeeDetails';
 import CreateEvent from './components/admin/CreateEvent';
 import Audits from './components/admin/Audits';
-import { mockData } from './data/mockData';
+import NGOConnect from './components/admin/NGOConnect';
+
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
           <Route path="events/create" element={<CreateEvent />} />
           <Route path="events/:id" element={<EventDetails/>} />
           <Route path="audits" element={<Audits />} />
+          <Route path="ngoconnect" element={<NGOConnect />} />
         </Route>
       </Routes>
     </Router>
