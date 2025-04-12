@@ -1,4 +1,3 @@
-
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import AdminLayout from './components/admin/AdminLayout';
 import Dashboard from './components/admin/Dashboard';
@@ -7,6 +6,7 @@ import Leaderboard from './components/admin/Leaderboard';
 import EventDetails from './components/admin/EventDetails';
 import EmployeeDetails from './components/admin/EmployeeDetails';
 import CreateEvent from './components/admin/CreateEvent';
+import Audits from './components/admin/Audits';
 import { mockData } from './data/mockData';
 
 function App() {
@@ -20,6 +20,7 @@ function App() {
           <Route path="leaderboard" element={<Leaderboard />} />
           <Route path="events/create" element={<CreateEvent />} />
           <Route path="events/:id" element={<EventDetails/>} />
+          <Route path="audits" element={<Audits />} />
         </Route>
       </Routes>
     </Router>

@@ -115,11 +115,7 @@ const EventDetails = () => {
               className="border rounded-lg shadow-sm hover:shadow-md transition-shadow p-4 bg-gray-50 flex flex-col h-full"
             >
               <div className="flex items-center mb-4">
-                <img
-                  src={`https://i.pravatar.cc/150?u=${submission._id}`} // Dummy avatar
-                  alt="User Avatar"
-                  className="w-12 h-12 rounded-full mr-4"
-                />
+                
                 <div>
                   <h3 className="text-lg font-medium">{submission.employeeName}</h3>
                   <p className="text-gray-500 text-sm">
@@ -137,7 +133,7 @@ const EventDetails = () => {
                   {submission.report}
                 </p>
                 <img
-                  src={submission.picture || 'https://via.placeholder.com/300'} // Dummy photo
+                  src={convertToRawGitHubURL(submission.picture) || 'https://via.placeholder.com/300'} // Dummy photo
                   alt="Submission"
                   className="w-full h-48 object-cover rounded-lg mb-4"
                 />

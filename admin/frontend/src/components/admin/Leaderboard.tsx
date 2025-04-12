@@ -54,7 +54,7 @@ const Leaderboard = () => {
           { bg: 'bg-pink-50 border-pink-300', text: 'text-pink-800' },
           { bg: 'bg-indigo-50 border-indigo-300', text: 'text-indigo-800' },
         ];
-        
+
         return colorSchemes[(index - 3) % colorSchemes.length];
       }
     }
@@ -84,7 +84,7 @@ const Leaderboard = () => {
       <p className="ml-3 text-lg font-medium">Loading leaderboard...</p>
     </div>
   );
-  
+
   if (error) return (
     <div className="p-8 bg-red-50 border border-red-200 rounded-lg text-red-600 flex items-center">
       <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -101,7 +101,7 @@ const Leaderboard = () => {
           <h1 className="text-3xl font-bold bg-gradient-to-r from-teal-600 to-teal-900 text-transparent bg-clip-text">Employee Leaderboard</h1>
           <p className="text-gray-600 mt-1">Top performers ranked by earned coins</p>
         </div>
-        
+
         <div className="flex flex-col sm:flex-row gap-4 mt-4 md:mt-0 w-full md:w-auto">
           <div className="relative">
             <input
@@ -115,16 +115,16 @@ const Leaderboard = () => {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
           </div>
-          
+
           <div className="flex rounded-lg overflow-hidden border border-gray-300">
-            <button 
-              onClick={() => setViewMode('all')} 
+            <button
+              onClick={() => setViewMode('all')}
               className={`px-4 py-2 ${viewMode === 'all' ? 'bg-teal-500 text-white' : 'bg-white text-gray-700'}`}
             >
               All
             </button>
-            <button 
-              onClick={() => setViewMode('top10')} 
+            <button
+              onClick={() => setViewMode('top10')}
               className={`px-4 py-2 ${viewMode === 'top10' ? 'bg-teal-500 text-white' : 'bg-white text-gray-700'}`}
             >
               Top 10
@@ -139,12 +139,8 @@ const Leaderboard = () => {
           {/* Second Place */}
           <div className="flex flex-col items-center">
             <div className="relative">
-              <img 
-                src={getRandomAvatar(sortedEmployees[1]?._id || '2')} 
-                alt={sortedEmployees[1]?.name}
-                className="w-16 h-16 rounded-full border-4 border-gray-400 object-cover"
-              />
-              <div className="absolute -bottom-2 -right-2 bg-gray-300 rounded-full p-1">
+
+              <div className="absolute -bottom-2 -right-4 bg-gray-300 rounded-full p-1">
                 <Medal className="w-5 h-5 text-white" />
               </div>
             </div>
@@ -159,19 +155,11 @@ const Leaderboard = () => {
               <span className="text-2xl font-bold text-white">2</span>
             </div>
           </div>
-          
+
           {/* First Place */}
           <div className="flex flex-col items-center">
             <div className="relative">
-              <div className="absolute -top-6 left-1/2 transform -translate-x-1/2">
-                <Award className="w-8 h-8 text-yellow-500" />
-              </div>
-              <img 
-                src={getRandomAvatar(sortedEmployees[0]?._id || '1')} 
-                alt={sortedEmployees[0]?.name}
-                className="w-20 h-20 rounded-full border-4 border-yellow-400 object-cover"
-              />
-              <div className="absolute -bottom-2 -right-2 bg-yellow-400 rounded-full p-1">
+              <div className="absolute -bottom-2 -right-5 bg-yellow-400 rounded-full p-1">
                 <Trophy className="w-6 h-6 text-white" />
               </div>
             </div>
@@ -186,7 +174,7 @@ const Leaderboard = () => {
               <span className="text-3xl font-bold text-white">1</span>
             </div>
           </div>
-          
+
           {/* Third Place */}
           <div className="flex flex-col items-center">
             <div className="relative">
@@ -195,7 +183,7 @@ const Leaderboard = () => {
                 alt={sortedEmployees[2]?.name}
                 className="w-16 h-16 rounded-full border-4 border-orange-400 object-cover"
               /> */}
-              <div className="absolute -bottom-2 -right-2 bg-orange-400 rounded-full p-1">
+              <div className="absolute -bottom-2 -right-4 bg-orange-400 rounded-full p-1">
                 <Medal className="w-5 h-5 text-white" />
               </div>
             </div>
@@ -218,7 +206,7 @@ const Leaderboard = () => {
           <div className="grid grid-cols-1 gap-3">
             {displayedEmployees.map((employee, index) => {
               const rankStyle = getRankStyle(index);
-              
+
               return (
                 <div
                   key={employee._id}
@@ -228,27 +216,27 @@ const Leaderboard = () => {
                     <div className="flex-shrink-0 w-12">
                       {getRankIcon(index)}
                     </div>
-                    
+
                     {/* <img 
                       src={getRandomAvatar(employee._id)}
                       alt={employee.name}
                       className="w-12 h-12 rounded-full border-2 border-white shadow-sm object-cover"
                     /> */}
-                    
+
                     <div>
                       <h3 className={`font-bold ${rankStyle.text}`}>{employee.name}</h3>
                       <p className="text-sm text-gray-600">{employee.company}</p>
                     </div>
                   </div>
-                  
+
                   <div className="text-right flex flex-row items-center gap-2 bg-white bg-opacity-50 py-2 px-4 rounded-full shadow-sm">
-                    <Coins className="w-5 h-5 text-yellow-500"/>
+                    <Coins className="w-5 h-5 text-yellow-500" />
                     <p className={`font-bold text-lg ${rankStyle.text}`}>{employee.coins}</p>
                   </div>
                 </div>
               );
             })}
-            
+
             {displayedEmployees.length === 0 && (
               <div className="text-center py-10 text-gray-500">
                 <svg className="w-16 h-16 mx-auto text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -259,7 +247,7 @@ const Leaderboard = () => {
             )}
           </div>
         </div>
-        
+
         <div className="bg-gray-50 px-6 py-4 border-t border-gray-100 flex justify-between items-center">
           <p className="text-gray-600 text-sm">{displayedEmployees.length} employees shown</p>
           <div className="flex items-center text-teal-500">

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { PlusCircle, FileText } from 'lucide-react';
+import { PlusCircle, FileText, Download } from 'lucide-react';
 import { format } from 'date-fns';
 import axios from 'axios';
 import { Admin } from '../../types';
@@ -8,6 +8,9 @@ import { Admin } from '../../types';
 const Dashboard = () => {
   const [adminData, setAdminData] = useState<Admin | null>(null);
   const [loading, setLoading] = useState(true);
+  const [reports, setReports] = useState<string[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
 
   const convertToRawGitHubURL = (url: string): string => {
     try {
@@ -46,6 +49,44 @@ const Dashboard = () => {
     fetchAdmin();
   }, []);
 
+  const handleGenerateAudit = async () => {
+    setLoading(true);
+    setError(null);
+    setSuccess(null);
+    
+    try {
+      // Use the admin ID from the context or a default value
+      const adminId = '67f97a70406569c0972224ac'; // Replace with actual admin ID from context
+      
+      // Call the Flask API to generate reports
+      const response = await axios.get(`http://localhost:5001/api/generate-report/${adminId}`);
+      
+      if (response.data && response.data.reports) {
+        setReports(response.data.reports);
+        setSuccess(`Successfully generated ${response.data.reports.length} reports!`);
+      } else {
+        setError('Failed to generate reports. No reports returned.');
+      }
+    } catch (err) {
+      console.error('Error generating reports:', err);
+      setError('Failed to generate reports. Please try again later.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDownloadReport = async (reportName: string) => {
+    try {
+      const adminId = '67f97a70406569c0972224ac'; // Replace with actual admin ID from context
+      
+      // Call the Flask API to download a specific report
+      window.open(`http://localhost:5001/api/generate-single-report/${adminId}/${reportName.replace('_report.pdf', '')}`, '_blank');
+    } catch (err) {
+      console.error('Error downloading report:', err);
+      alert('Failed to download report. Please try again later.');
+    }
+  };
+
   if (loading) return <div>Loading...</div>;
   if (!adminData) return <div>No data found</div>;
 
@@ -62,14 +103,47 @@ const Dashboard = () => {
             Create Event
           </Link>
           <button
-            // onClick={handleGenerateAudit}
-            className="inline-flex items-center px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700"
+            onClick={handleGenerateAudit}
+            disabled={loading}
+            className="inline-flex items-center px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 disabled:opacity-50"
           >
             <FileText className="w-5 h-5 mr-2" />
-            Generate Audit
+            {loading ? 'Generating...' : 'Generate Audit'}
           </button>
         </div>
       </div>
+
+      {error && (
+        <div className="mb-6 p-4 bg-red-100 text-red-700 rounded-md">
+          {error}
+        </div>
+      )}
+
+      {success && (
+        <div className="mb-6 p-4 bg-green-100 text-green-700 rounded-md">
+          {success}
+        </div>
+      )}
+
+      {reports.length > 0 && (
+        <div className="mb-8 bg-white rounded-lg shadow-md p-6">
+          <h2 className="text-xl font-semibold mb-4">Generated Reports</h2>
+          <div className="space-y-2">
+            {reports.map((report, index) => (
+              <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-md">
+                <span className="font-medium">{report}</span>
+                <button
+                  onClick={() => handleDownloadReport(report)}
+                  className="inline-flex items-center px-3 py-1 bg-teal-600 text-white rounded-md hover:bg-teal-700"
+                >
+                  <Download className="w-4 h-4 mr-1" />
+                  Download
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {adminData.events.map((event) => (

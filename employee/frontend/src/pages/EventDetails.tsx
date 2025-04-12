@@ -23,7 +23,7 @@ function EventDetails() {
   // Mock Employee Data (Replace this with actual logic to fetch employee details)
   const employee = {
     _id: '67f98872c782341dec08fd94',
-    name: 'John Doe',
+    name: 'Samkit Samsukha',
   };
 
   // Replace with actual admin ID
@@ -70,23 +70,31 @@ function EventDetails() {
       return;
     }
 
+    if (!event) {
+      alert("Event details not found.");
+      return;
+    }
+
     try {
+      // Only send the fields that the backend controller expects
       const res = await axios.post(
         `http://localhost:5000/api/events/${adminId}/${id}/submit`,
         {
           employeeId: employee._id,
-          employeeName: employee.name,
+          employeeName: "Samkit Samsukha",
           report,
-          picture,
+          picture
         }
       );
+      
       if (res.status !== 200) {
         throw new Error("Failed to submit report");
       }
+      
       setReport("");
       setPicture("");
       setEvent((prevEvent) => {
-              if (!prevEvent) return prevEvent; // Ensure prevEvent is not null
+              if (!prevEvent) return prevEvent;
               return {
                 ...prevEvent,
                 submissions: [
@@ -98,7 +106,30 @@ function EventDetails() {
       alert("Report submitted successfully!");
     } catch (error) {
       console.error("Error submitting report:", error);
-      alert("Submission failed. Try again.");
+      
+      if (axios.isAxiosError(error)) {
+        if (error.response) {
+          switch (error.response.status) {
+            case 404:
+              alert("Event or admin not found. Please try again later.");
+              break;
+            case 400:
+              alert("Invalid submission data. Please check your input and try again.");
+              break;
+            case 500:
+              alert("Server error. Please try again later.");
+              break;
+            default:
+              alert(`Error: ${error.response.data.message || "Failed to submit report"}`);
+          }
+        } else if (error.request) {
+          alert("No response from server. Please check your internet connection and try again.");
+        } else {
+          alert("Error setting up the request. Please try again.");
+        }
+      } else {
+        alert("An unexpected error occurred. Please try again.");
+      }
     }
   };
 
